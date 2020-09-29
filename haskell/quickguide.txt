@@ -1,0 +1,540 @@
+Haskell Base Library Quick Reference
+
+This page lists classes, types and functions that we will often use in our course. For the complete story, see the full library documentation at haskell.org.
+
+Quick jump: Type classes | Numbers | Booleans | Characters | 
+s | Tuples | Maybe | Lists (extra) | Functions | Input/output | Printf | Paths | Files | Directories | Random | Word | Bytestrings | Environment | Miscellaneous
+Type classes
+class Eq e
+
+Instances: All basic types except functions
+Minimal definition: either (==) or (/=)
+
+(==), (/=) :: e → e → Bool
+    Equality and inequality operators.
+
+class Ord o (extends Eq)
+
+Instances: All basic types except functions
+Minimal definition: either compare or (<=)
+
+(<), (<=), (>), (>=) :: o → o → Bool
+    Comparison operators.
+compare :: o -> o -> Ordering
+    Compare two values, returning an Ordering (i.e. LT, EQ, or GT).
+min, max :: o → o → o
+    Return the minimum or maximum of two values.
+
+class Show s
+
+Instances: All basic types except functions
+
+show :: s → String
+    Convert a value to its string representation.
+
+class Read r
+
+Instances: All basic types except functions
+
+read :: String → r
+    Parse a value from a string.
+
+class Bounded b
+
+Instances: Bool, Char, Int
+
+minBound :: b
+maxBound :: b
+    Lower and upper bounds for a type.
+
+class Enum e
+
+Instances: Bool, Char, Int, Double, Float
+
+An enumerable type that can be used in ranges such as [1 .. 5].
+
+succ :: e -> e
+pred :: e -> e
+    Successor and predecessor functions.
+
+class Num n
+
+Instances: Int, Integer, Float, Double
+
+(+), (-), (*) :: n → n → n
+    Addition, subtraction, and multiplication operators.
+abs :: n → n
+    Absolute value.
+
+class Integral i (extends Num)
+
+Instances: Int, Integer
+
+div, mod :: i → i → i
+    Integer division (truncating toward -∞) and modulus (always non-negative).
+
+class Fractional f (extends Num)
+
+Instances: Float, Double
+
+(/) :: f → f → f
+    Real division.
+cos :: f → f
+exp :: f → f
+log :: f → f
+pi :: f
+sin :: f → f
+sqrt :: f → f
+tan :: f → f
+    Standard numeric functions.
+
+class RealFrac r (extends Fractional)
+
+Instances: Float, Double
+
+ceiling :: Integral i => r → i
+    Return the smallest integer that is not less than x.
+floor :: Integral i => r → i
+    Return the greatest integer that is not greater than x.
+
+Numbers
+type Int
+
+Instance of: Num, Integral
+
+A fixed-length signed integer. In GHC, this is a 64-bit value.
+type Integer
+
+Instance of: Num, Integral
+
+A signed integer of arbitrary size.
+type Float
+type Double
+
+Instance of: Num, Fractional
+
+Single- and double-precision floating-point numbers.
+numeric functions
+
+(^) :: (Num n, Integral i) => n → i → n
+    Exponentiation to an integral power.
+fromIntegral :: (Integral i, Num n) => i → n
+    Convert an integer to a number of any type.
+
+Booleans
+type Bool
+
+Instance of: Bounded
+
+A value that is either True or False.
+
+(&&) :: Bool → Bool → Bool
+(||) :: Bool → Bool → Bool
+    Logical AND and OR operators.
+not :: Bool → Bool
+    Logical negation.
+
+Characters
+type Char
+
+Instance of: Bounded
+
+A Unicode character.
+
+Import the Data.Char module to access these functions:
+
+chr :: Int → Char
+    Convert a Unicode code point to a character. For example, chr(65) is 'A'.
+digitToInt :: Char -> Int
+    Convert a Char to the corresponding Int. For example, (digitToInt '7') == 7. Hexadecimal digits are supported.
+intToDigit :: Int -> Char
+    Convert an Int in the range 0..15 to the corresponding Char. For example, (intToDigit 7) == '7'. Hexadecimal digits are supported.
+isAlpha :: Char → Bool
+    Check whether a character is a letter.
+isDigit :: Char → Bool
+    Check whether a character is a digit.
+isLower :: Char → Bool
+    Check whether a character is a lowercase letter.
+isSpace :: Char → Bool
+    Check whether a character is whitespace.
+isUpper :: Char → Bool
+    Check whether a character is an uppercase letter.
+ord :: Char → Int
+    Convert a character to a Unicode code point. For example, ord('A') is 65.
+toLower :: Char → Char
+    Convert a character to lowercase.
+toUpper :: Char → Char
+    Convert a character to uppercase.
+
+Strings
+type String = [Char]
+
+A string is a list of characters.
+
+lines :: String → [String]
+    Break a string into a list of lines, separated by newline characters.
+unlines :: [String] -> String
+    Join a list of strings into a single string, separating the strings with newline characters.
+unwords :: [String] -> String
+    Join a list of strings into a single string, separating the strings with spaces.
+words :: String → [String]
+    Break a string into a list of words, separated by sequences of whitespace characters.
+
+Tuples
+type (a, b)
+type (a, b, c)
+…
+
+fst :: (a, b) → a
+snd :: (a, b) → b
+    Return the first or second component of a pair.
+
+Maybe
+
+data Maybe t = Nothing | Just t
+
+Import the Data.Maybe module to access these functions:
+
+fromJust :: Maybe a -> a
+    Return the value in a Just, throwing an error if the argument is Nothing.
+fromMaybe :: a -> Maybe a -> a
+    Given a default value and a Maybe, return the default value if the Maybe is Nothing; otherwise return the value in the Maybe.
+listToMaybe :: [a] -> Maybe a
+    Return (Just a) where a is the first element of the list, or Nothing on an empty list.
+
+Lists
+type [a]
+
+A list of elements of type a.
+
+Lists can be compared lexicographically.
+
+[] :: [a]
+    The empty list.
+(:) :: a → [a] → [a]
+    Prepend an element to a list.
+(++) :: [a] → [a] → [a]
+    Append two lists.
+(!!) :: [a] → Int → a
+    Return the nth element of a non-empty list.
+all :: (a → Bool) → [a] → Bool
+    Return true if all values in a list satisfy a predicate.
+and :: [Bool] → Bool
+    Return true if all values in a boolean list are true.
+any :: (a → Bool) → [a] → Bool
+    Return true if any values in a list satisfy a predicate.
+concat :: [[a]] → [a]
+    Flatten a list of lists into a single-level list.
+concatMap :: (a -> [b]) -> [a] → [b]
+    Map a function over a list and concatenate the resulting lists.
+drop :: Int → [a] → [a]
+    Drop the first n elements from a list. If the list has fewer than n elements, the empty list is returned.
+dropWhile :: (a → Bool) → [a] → [a]
+    Drop the longest prefix of elements that satisfy a predicate.
+elem :: Eq a => a → [a] → Bool
+    Return true if a list contains a given value.
+filter :: (a → Bool) → [a] → [a]
+    Select all elements of a list that satisfy a predicate.
+foldl :: (a → b → a) → a → [b] → a
+    Reduce a list using a binary operator, from left to right. For example,
+
+foldl (+) 0 [1, 2, 3] == 6
+
+foldl1 :: (a → a → a) → [a] → a
+    A variant of foldl that has no starting value argument (and so it can't be applied to empty lists).
+foldr :: (a → b → b) → b → [a] → b
+    Reduce a list using a binary operator, from right to left. For example,
+
+foldr (+) 0 [1, 2, 3] == 6
+
+foldr1 :: (a → a → a) → [a] → a
+    A variant of foldr that has no starting value argument (and so it can't be applied to empty lists).
+head :: [a] → a
+    Return the first element of a non-empty list.
+init :: [a] -> [a]
+    Return all elements of a list except the last element. The list must be non-empty.
+iterate :: (a -> a) -> a -> [a]
+    Return an infinite list generated by applying a function repeatedly:
+
+iterate f x = [x, f x, f (f x), ...]
+
+last :: [a] → a
+    Return the last element of a non-empty list.
+length :: [a] → Int
+    Return the length of a list.
+lookup :: Eq a => a -> [(a, b)] -> Maybe b
+    Look up a key in an association list, i.e. a list of (key, value) pairs.
+map :: (a → b) → [a] → [b]
+    Apply a function to all elements of a list.
+maximum :: Ord a => [a] → a
+    Return the largest value in a list.
+minimum :: Ord a => [a] → a
+    Return the smallest value in a list.
+null :: [a] → Bool
+    Return true if a list is empty.
+or :: [Bool] → Bool
+    Return true if any values in a boolean list are true.
+repeat :: a → [a]
+    Produce an infinite list of identical elements.
+replicate :: Int → a → [a]
+    Produce a list with n identical elements.
+reverse :: [a] → [a]
+    Reverse a list.
+span :: (a -> Bool) -> [a] -> ([a], [a])
+    Split a list into two lists using a predicate p. (span p l) is equivalent to (takeWhile p l, dropWhile p l).
+splitAt :: Int -> [a] -> ([a], [a])
+    Split a list into two lists: the first contains the first n elements, and the second contains the remaining elements. (splitAt n xs) is equivalent to (take n xs, drop n xs).
+sum :: Num a => [a] → a
+    Return the sum of a list of numbers.
+tail :: [a] → a
+    Return a list of all elements except the first element. The list must be non-empty.
+take :: Int → [a] → [a]
+    Return the first n elements of a list. If the list has fewer than n elements, the entire list is returned.
+takeWhile :: (a → Bool) → [a] → [a]
+    Return the longest prefix of elements that satisfy a predicate.
+unzip :: [(a, b)] -> ([a], [b])
+    Produce a pair of lists from a list of pairs.
+unzip3 :: [(a, b, c)] -> ([a], [b], [c])
+    Produce a triple of lists from a list of triples.
+zip :: [a] → [b] → [(a, b)]
+    Produce a list of pairs from a pair of lists. If one of the input lists is shorter than the other, excess elements of the longer list are discarded.
+zip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+    zip3 takes three lists and returns a list of triples.
+zipWith :: (a → b → c) → [a] → [b] → [c]
+    A generalized version of zip that combines corresponding elements using the given function rather than a tupling function.
+
+Additional list functions
+
+Import the Data.List module to access these functions:
+
+(\\) :: Eq a => [a] -> [a] -> [a]
+    Return the difference of two sets represented by lists. The result will contain no duplicates unless duplicates were already present in the first of the input lists.
+delete :: Eq a => a -> [a] -> [a]
+    Delete the first occurrence of a value from a list. If the value is not found, the list is returned unchanged:
+
+> delete 7 [2, 3, 7, 1, 5]
+[2,3,1,5]
+> delete 6 [2, 3, 7, 1, 5]
+[2,3,7,1,5]
+
+elemIndex :: Eq a => a -> [a] -> Maybe Int
+    Return the index of the first element in the given list that is equal to the query element, or Nothing if there is no such element.
+find :: (a → Bool) → [a] → Maybe a
+    Return the first element in the list that satisfies the given predicate, or Nothing if there is none.
+group :: Eq a => [a] -> [[a]]
+    Group adjacent identical elements into sublists. For example,
+
+group "Mississippi" == ["M","i","ss","i","ss","i","pp","i"]
+
+groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
+    Like group, but using a caller-specified equality test rather than (==).
+intercalate :: [a] -> [[a]] -> [a]
+    Insert a list of elements between each pair of lists in the second argument. Usually you will use this function when you want to join strings. For example, intercalate ", " ["abc", "def", "ghi"] returns "abc, def, ghi".
+intersect :: Eq a => [a] -> [a] -> [a]
+    Return an intersection of two sets represented by lists. The result will contain no duplicates unless duplicates were already present in one of the original lists.
+isInfixOf :: Eq a => [a] -> [a] -> Bool
+    Take two lists and return true if the first list is contained, wholly and intact, anywhere within the second.
+isPrefixOf :: Eq a => [a] -> [a] -> Bool
+    Take two lists and return true if the first list is a prefix of the second.
+isSuffixOf :: Eq a => [a] -> [a] -> Bool
+    Take two lists and return true if the first list is a suffix of the second.
+maximumBy :: (a -> a -> Ordering) -> [a] -> a
+    Compute the largest element of a list with respect to a comparison function.
+minimumBy :: (a -> a -> Ordering) -> [a] -> a
+    Compute the smallest element of a list with respect to a comparison function.
+nub :: Eq a => [a] -> [a]
+    Remove duplicate elements from a list. Note that this function runs in O(N2).
+partition :: (a -> Bool) -> [a] -> ([a], [a])
+    Given a predicate and a list, return lists of elements that do and do not satisfy the predicate. In other words,
+
+(partition p list) == (filter p list, filter (\x -> not (p x)) list)
+
+sort :: Ord a => [a] → [a]
+    Sort a list, keeping duplicates.
+sortBy :: (a -> a -> Ordering) -> [a] -> [a]
+    Sort elements using a comparison function.
+tails :: [a] -> [[a]]
+    Return all final segments of a list. For example,
+
+tails "abc" == ["abc", "bc", "c", ""]
+
+transpose :: [[a]] -> [[a]]
+    Transpose the rows and columns of a list of lists. For example, transpose [[1,2,3],[4,5,6]] returns [[1,4],[2,5],[3,6]].
+union :: Eq a => [a] -> [a] -> [a]
+    Return a union of two sets represented by lists. The result will contain no duplicates unless duplicates were already present in one of the original lists.
+
+Functions
+
+(.) :: (b → c) → (a → b) → (a → c)
+    The function composition operator.
+($) :: (a -> b) -> a -> b
+    The function application operator. $ has low precedence and binds to the right, so
+
+f $ g $ h x == f (g (h x))
+
+id :: a -> a
+    The identity function.
+
+Input/output
+type IO a
+
+An I/O action that returns a value of type a.
+
+getContents :: IO String
+    Return all input as a single string, which is read lazily as needed.
+getLine :: IO String
+    Read a line from standard input.
+mapM :: (a -> IO b) -> [a] -> IO [b]
+    Map a function that returns an I/O action over a list, then combine the results into a single I/O action.
+mapM_ :: (a -> IO b) -> [a] -> IO ()
+    Like mapM, but ignores the resulting values.
+print :: Show a => a -> IO ()
+    Print a value of any printable type, followed by a newline.
+putStr :: String → IO ()
+    Write a string to standard output.
+putStrLn :: String → IO ()
+    Write a string to standard output, followed by a newline character.
+readLn :: Read a => IO a
+    Read a line and parse it into a value of any readable type.
+sequence :: [IO a] -> IO [a]
+    Combine a list of IO actions into a single IO action that returns a list of results.
+
+Additional I/O-related functions
+
+Import the Control.Monad module to access these functions:
+
+forM :: [a] -> (a -> IO b) -> IO [b]
+    Like mapM, but with the arguments flipped.
+forM_ :: [a] -> (a -> IO b) -> IO ()
+    Like mapM_, but with the arguments flipped.
+when :: Bool -> IO () -> IO ()
+    Conditional execution of I/O actions. If the given Bool is true, then when returns the same I/O action it is given. If the given Bool is false, then when returns the action return (), which does nothing.
+
+Printf
+
+Import the Text.Printf module to access this function:
+
+printf :: PrintfType r => String -> r
+    Print formatted output. For example:
+
+>>> printf "%s, %d, %.4f" "hello" 123 pi
+hello, 123, 3.1416
+
+    You are probably familiar with other implementations of printf, such as in the standard C library. This version is largely compatible; for example, in the format string above, %s represents a string, %d represents a integer and %.4f is a floating-point number rounded to four digits after the decimal point. See the official documentation for more details.
+
+Paths
+
+type FilePath = String
+
+A FilePath represents a filename.
+
+Import the System.FilePath module to access these functions:
+
+combine :: FilePath -> FilePath -> FilePath
+(</>) :: FilePath -> FilePath -> FilePath
+    Combine two paths. The infix operator </> is a synonym for the combine function. For example,
+
+    "mydir" </> "myfile.txt"
+
+    will produce "mydir/myfile.txt" on Unix or macOS, and "mydir\myfile.txt" on Windows.
+takeExtension :: FilePath -> String
+    Return a filename's extension. For example, takeExtension "mydir/myfile.png" will return ".png".
+
+Files
+
+readFile :: FilePath -> IO String
+    Read a file (lazily) and return its contents as a string.
+writeFile :: FilePath -> String -> IO ()
+    Write a string to a file.
+
+Directories
+
+Import the System.Directory module to access these functions:
+
+doesDirectoryExist :: FilePath -> IO Bool
+    Return True if the given path exists and is a directory (i.e. not a file), otherwise False.
+doesFileExist :: FilePath -> IO Bool
+    Return True if the given path exists and is a file (i.e. not a directory), otherwise False.
+listDirectory :: FilePath -> IO [FilePath]
+    Return a list of the names of all files and directories in the given directory. (The special directories "." and ".." are not included in the returned list.)
+
+Random numbers
+
+To access these functions, you must install the random package and import the System.Random module.
+
+class RandomGen g
+
+A random number generator.
+
+next :: g -> (Int, g)
+
+Return a random Int in a certain range, plus a new generator.
+
+split :: g -> (g, g)
+
+Split a random number generator into two generators.
+
+data StdGen
+
+The standard random number generator implementation.
+
+mkStdGen :: Int -> StdGen
+
+Make a StdGen given a seed value.
+
+newStdGen :: IO StdGen
+
+Return a new random number generator with a system-dependent seed.
+
+class Random r
+Instances: All built-in numeric types, Bool, Char
+
+A type that can be generated randomly.
+
+random :: RandomGen g => g -> (r, g)
+
+Generate a random value, together with a new generator. For bounded types, the range is normally the whole type. For fractional types, the range is normally the interval [0, 1).
+
+randomR :: RandomGen g => (r, r) -> g -> (r, g)
+
+Given a range (lo, hi) and a generator, returns a value in the interval [low, hi], together with a new generator.
+
+randomRs :: RandomGen g => (r, r) -> g -> [r]
+
+A plural variant of randomR, producing an infinite list of random values instead of returning a new generator.
+
+randoms :: RandomGen g => g -> [r]
+
+A plural variant of random, producing an infinite list of random values instead of returning a new generator.
+Word
+
+Import the Data.Word module to access this type:
+
+Word8
+    An unsigned 8-bit integer, i.e. an unsigned byte.
+
+Bytestrings
+
+Bytestrings are sequences of bytes.
+
+Import the Data.ByteString or Data.ByteString.Lazy module to access the following functions. (You probably want to use a qualified import to avoid name clashes with the Data.List module.)
+
+pack :: [Word8] -> ByteString
+    Convert a list of bytes to a ByteString.
+unpack :: ByteString -> [Word8]
+    Convert a ByteString to a list of bytes.
+    The ByteString modules additionally contain many functions with the same names and functionality as their counterparts in the Data.List module. For details, see the official documentation for ByteString.
+
+Environment
+
+Import the System.Environment module to access this function:
+
+getArgs :: IO [String]
+
+Return a list of the program's command-line arguments.
+Miscellaneous
+
+error :: String -> a
+    Stop execution and display an error message.
+
+
