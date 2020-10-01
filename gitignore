@@ -1,0 +1,6 @@
+haskell/.vscode
+*.o
+haskell/test
+haskell/sudoku_clean
+haskell/sudoku
+
